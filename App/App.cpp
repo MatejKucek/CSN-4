@@ -68,40 +68,40 @@ public:
 
 };
 
-int main()
-{
+deque<Language*> loadData() {
 	string languages[] = { "Arabic","basque","Catalan","Chinese","Czech","English","Greek","Hungarian","Italian","Turkish" };
 	int languagesAmount = 10;
 	string languagePostFix = "_syntactic_dependency_network.txt";
-	Language* lang = new Language[10];
+	deque<Language*> lang;
 
-	//for (int i = 0;i < languagesAmount;i++) {
-	for (int i = 0;i < 1;i++) {
+	for (int i = 0;i < languagesAmount;i++) {
+		//this is just for faster testing
+		//for (int i = 0;i < 1;i++) {
+		//ifstream f("data/Czech" + languagePostFix);
+		ifstream f("data/" + languages[i] + languagePostFix);
 
-		//ifstream f("data/"+languages[i] + languagePostFix);
-		ifstream f("data/Czech" + languagePostFix);
-		string line;
+		lang.push_back(new Language());
 		
-		lang[i].name = languages[i];
-			
-		string a,b;
-		f >> lang[i].nodes;
-		f >> lang[i].vertices;
+		lang[i]->name = languages[i];
+
+		string a, b;
+		f >> lang[i]->nodes;
+		f >> lang[i]->vertices;
 
 		string previousNode = "";
-		Node *node=new Node();
+		Node *node = new Node();
 		int index = 0;
-		cout << i << " processing " << lang[i].name << endl;
+		cout << i << " processing " << lang[i]->name << endl;
 
 		while (f >> a) {
 			f >> b;
 			index++;
-			if (index % 10000 == 0)cout << index << " out of " << lang[i].vertices << endl;
+			if (index % 10000 == 0)cout << index << " out of " << lang[i]->vertices << endl;
 
 			if (previousNode != a) {
 
 				if (previousNode != "") {
-					lang[i].data.addNode(*node);
+					lang[i]->data.addNode(*node);
 				}
 				previousNode = a;
 				delete(node);
@@ -109,10 +109,17 @@ int main()
 			}
 			node->addVertice(b);
 		}
-		lang[i].data.addNode(*node);
+		lang[i]->data.addNode(*node);
 
 		f.close();
 	}
+
+	return lang;
+}
+
+int main()
+{
+	deque<Language*> languages = loadData();
 
 	getchar();
 
