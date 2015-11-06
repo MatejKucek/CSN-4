@@ -65,7 +65,6 @@ public:
 	int nodes;
 	int vertices;
 	Graph data;
-
 };
 
 deque<Language*> loadData() {
@@ -121,12 +120,29 @@ deque<Language*> loadData() {
 	return lang;
 }
 
+void printTable1(deque<Language*> languages) {
+	
+	cout << "Language\tN\tE\t(k)\tRo\n";
+
+	for (deque<Language*>::iterator i = languages.begin();i != languages.end();i++) {
+		double N = (double)(*i)->vertices;
+		double E = (double)(*i)->nodes;
+
+		cout << (*i)->name << "\t";
+		cout << N << "\t";
+		cout << E << "\t";
+		cout << E / N << "\t";
+		cout << 2 * E / (N*(N + 1))<<endl;
+	}
+}
+
 int main()
 {
 	deque<Language*> languages = loadData();
 
-	getchar();
+	printTable1(languages);
 
+	getchar();
     return 0;
 }
 
