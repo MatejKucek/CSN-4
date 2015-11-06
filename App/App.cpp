@@ -90,14 +90,12 @@ deque<Language*> loadData() {
 
 		string previousNode = "";
 		Node *node = new Node();
-		int index = 0;
-		cout << i << " processing " << lang[i]->name << endl;
+		int duplicates = 0;
+		cout << i+1 << " processing " << lang[i]->name << endl;
 
 		while (f >> a) {
 			f >> b;
-			index++;
-			if (index % 10000 == 0)cout << index << " out of " << lang[i]->vertices << endl;
-
+			
 			if (previousNode != a) {
 
 				if (previousNode != "") {
@@ -107,11 +105,17 @@ deque<Language*> loadData() {
 				delete(node);
 				node = new Node(a);
 			}
-			node->addVertice(b);
+			if (b != a) {
+				node->addVertice(b);
+			}
+			else {
+				duplicates++;
+			}
 		}
 		lang[i]->data.addNode(*node);
 
 		f.close();
+		cout << "duplicates found: " << duplicates << endl;
 	}
 
 	return lang;
