@@ -6,6 +6,8 @@
 #include <iostream>
 #include <string>
 #include <deque>
+#include <unordered_map>
+#include <set>
 
 #include <windows.h>
 
@@ -14,104 +16,75 @@ using namespace std;
 class Node {
 
 public:
-	string name;
-	deque<string> vertices;
-
-	void addVertice(string verticeName) {
-		vertices.push_back(verticeName);
-	}
-
-	Node() {}
-	Node(string name) {
-		this->name = name;
-	}
-};
-
-class Graph {
-
-public:
-	deque<Node> nodes;
-
-	int findNode(string nodeName) {
-
-		for (int i = 0;i < nodes.size();i++) {
-			if (nodes[i].name == nodeName) {
-				return i;
-			}
-		}
-		nodes.push_back(nodeName);
-		return nodes.size() - 1;
-	}
-
-	void addNode(string nodeName) {
-		nodes.emplace_back(nodeName);
-	}
-
-	void addNode(Node node) {
-		nodes.push_back(node);
-	}
-	
-	void addVertice(string nodeName, string targetNode) {
-		
-		int i = findNode(nodeName);
-		nodes[i].addVertice(targetNode);
-	}
+	set<int> vertices;
 };
 
 class Language {
 
 public:
 	string name;
-	int nodes;
-	int vertices;
-	Graph data;
+	int amountOfNodes;
+	int amountOfVertices;
+	vector<Node> nodes;
 };
 
 deque<Language*> loadData() {
-	string languages[] = { "Arabic","basque","Catalan","Chinese","Czech","English","Greek","Hungarian","Italian","Turkish" };
+	string languages[] = { "Arabic","Basque","Catalan","Chinese","Czech","English","Greek","Hungarian","Italian","Turkish" };
 	int languagesAmount = 10;
 	string languagePostFix = "_syntactic_dependency_network.txt";
 	deque<Language*> lang;
 
-	for (int i = 0;i < languagesAmount;i++) {
-		//this is just for faster testing
-		//for (int i = 0;i < 1;i++) {
-		//ifstream f("data/Czech" + languagePostFix);
-		ifstream f("data/" + languages[i] + languagePostFix);
+	//for (int i = 0;i < languagesAmount;i++) {
 
+	//this is just for faster testing
+	for (int i = 0;i < 1;i++) {
+
+
+		ifstream f("data/" + languages[i] + languagePostFix);
 		lang.push_back(new Language());
-		
 		lang[i]->name = languages[i];
 
 		string a, b;
-		f >> lang[i]->nodes;
-		f >> lang[i]->vertices;
+		f >> lang[i]->amountOfNodes;
+		f >> lang[i]->amountOfVertices;
+		lang[i]->nodes.resize(lang[i]->amountOfNodes);
 
-		string previousNode = "";
-		Node *node = new Node();
 		int duplicates = 0;
-		cout << i+1 << " processing " << lang[i]->name << endl;
+		unordered_map<string, int> map;
+		int index = 0;
+
+		cout << i + 1 << " processing " << lang[i]->name << endl;
 
 		while (f >> a) {
 			f >> b;
-			
-			if (previousNode != a) {
 
-				if (previousNode != "") {
-					lang[i]->data.addNode(*node);
-				}
-				previousNode = a;
-				delete(node);
-				node = new Node(a);
+			if (a == b) {
+				duplicates++;
+				continue;
 			}
-			if (b != a) {
-				node->addVertice(b);
+
+			int ia, ib;
+
+			unordered_map<string, int>::const_iterator it=map.find(a);
+			if (it != map.end()) {
+				ia = it->second;
 			}
 			else {
-				duplicates++;
+				ia = index;
+				map[a] = index++;
 			}
+
+			it = map.find(b);
+			if (it != map.end()) {
+				ib = it->second;
+			}
+			else {
+				ib = index;
+				map[b] = index++;
+			}
+				
+			lang[i]->nodes[ia].vertices.insert(ib);
 		}
-		lang[i]->data.addNode(*node);
 
 		f.close();
 		cout << "duplicates found: " << duplicates << endl;
@@ -125,8 +98,8 @@ void printTable1(deque<Language*> languages) {
 	cout << "Language\tN\tE\t(k)\tRo\n";
 
 	for (deque<Language*>::iterator i = languages.begin();i != languages.end();i++) {
-		double N = (double)(*i)->vertices;
-		double E = (double)(*i)->nodes;
+		double N = (double)(*i)->amountOfVertices;
+		double E = (double)(*i)->amountOfNodes;
 
 		cout << (*i)->name << "\t";
 		cout << N << "\t";
@@ -138,6 +111,7 @@ void printTable1(deque<Language*> languages) {
 
 int main()
 {
+	
 	deque<Language*> languages = loadData();
 
 	printTable1(languages);
