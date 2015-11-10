@@ -41,6 +41,7 @@ deque<Language*> loadData() {
 
 
 		ifstream f("data/" + languages[i] + languagePostFix);
+		//ifstream f("data/test.txt");
 		lang.push_back(new Language());
 		lang[i]->name = languages[i];
 
@@ -109,12 +110,36 @@ void printTable1(deque<Language*> languages) {
 	}
 }
 
+double clusteringCoefficient(vector<Node>* nodes, int node) {
+
+	set<int> neighbours = (*nodes)[node].vertices;
+
+	if (neighbours.size() < 2)
+		return 0;
+
+	double numOfClosedPaths = 0;
+	double numOfPossiblePaths = 0;
+	for (int i = neighbours.size() - 1;i > 0;i--)
+		numOfPossiblePaths += i;
+
+	for (set<int>::iterator i = neighbours.begin();i!=neighbours.end();i++) {
+		for (set<int>::iterator j = (*nodes)[*i].vertices.begin();j != (*nodes)[*i].vertices.end();j++) {
+			if (neighbours.find(*j) != neighbours.end()) {
+				numOfClosedPaths++;
+			}
+		}
+	}
+	numOfClosedPaths /= 2;
+
+	return numOfClosedPaths / numOfPossiblePaths;
+}
+
 int main()
 {
 	
 	deque<Language*> languages = loadData();
 
-	printTable1(languages);
+	//printTable1(languages);
 
 	getchar();
     return 0;
